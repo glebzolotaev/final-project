@@ -8,17 +8,12 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /app/scheduler .
 
-FROM ubuntu:latest
+FROM alpine:latest
 
 ENV TODO_PORT=7540
 ENV TODO_DBFILE=/data/scheduler.db
 
 WORKDIR /app
-
-# обновляем пакеты, чтобы закрыть уязвимости базового образа
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /data
 

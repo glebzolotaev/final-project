@@ -41,9 +41,8 @@ docker build -t scheduler .
 ### Запуск образа
 
 ```bash
+mkdir -p data
+
 docker run -d \
   -p 7540:7540 \
-  -v "$(pwd)/data:/data" \
-  -e TODO_PASSWORD=12345 \
-  --name scheduler scheduler
-
+  -v "
