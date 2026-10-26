@@ -8,6 +8,7 @@ func Init() {
 	http.HandleFunc("/api/nextdate", nextDayHandler)
 	http.HandleFunc("/api/task", taskHandler)
 	http.HandleFunc("/api/tasks", tasksHandler)
+	http.HandleFunc("/api/task/done", doneHandler)
 }
 
 // taskHandler — промежуточный обработчик: раздаёт запросы по HTTP-методам
@@ -20,6 +21,8 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 		getTaskHandler(w, r)
 	case http.MethodPut:
 		updateTaskHandler(w, r)
+	case http.MethodDelete:
+		deleteTaskHandler(w, r)
 	default:
 		writeError(w, http.StatusMethodNotAllowed, "метод не поддерживается")
 	}
