@@ -5,10 +5,13 @@ import "net/http"
 // Init регистрирует все API-обработчики на стандартном маршрутизаторе.
 // Вызывается один раз из main() до запуска сервера.
 func Init() {
+	http.HandleFunc("/api/signin", signinHandler)
+
 	http.HandleFunc("/api/nextdate", nextDayHandler)
-	http.HandleFunc("/api/task", taskHandler)
-	http.HandleFunc("/api/tasks", tasksHandler)
-	http.HandleFunc("/api/task/done", doneHandler)
+
+	http.HandleFunc("/api/task", auth(taskHandler))
+	http.HandleFunc("/api/tasks", auth(tasksHandler))
+	http.HandleFunc("/api/task/done", auth(doneHandler))
 }
 
 // taskHandler — промежуточный обработчик: раздаёт запросы по HTTP-методам
