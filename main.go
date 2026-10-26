@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 
+	"final-project/pkg/api"
 	"final-project/pkg/db"
 	"final-project/tests"
 )
@@ -15,6 +16,9 @@ func main() {
 	if err := db.Init(getDBFile()); err != nil {
 		log.Fatalf("Ошибка при инициализации БД: %v", err)
 	}
+
+	// Регистрация API-обработчиков
+	api.Init()
 
 	port := getPort()
 	webDir := "./web"
