@@ -15,6 +15,11 @@ ENV TODO_DBFILE=/data/scheduler.db
 
 WORKDIR /app
 
+# обновляем пакеты, чтобы закрыть уязвимости базового образа
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    rm -rf /var/lib/apt/lists/*
+
 RUN mkdir -p /data
 
 COPY --from=builder /app/scheduler /app/scheduler
