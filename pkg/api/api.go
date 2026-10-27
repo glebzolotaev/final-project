@@ -2,8 +2,6 @@ package api
 
 import "net/http"
 
-// Init регистрирует все API-обработчики на стандартном маршрутизаторе.
-// Вызывается один раз из main() до запуска сервера.
 func Init() {
 	http.HandleFunc("/api/signin", signinHandler)
 
@@ -14,8 +12,6 @@ func Init() {
 	http.HandleFunc("/api/task/done", auth(doneHandler))
 }
 
-// taskHandler — промежуточный обработчик: раздаёт запросы по HTTP-методам
-// (на следующих шагах добавятся GET и DELETE).
 func taskHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
@@ -27,11 +23,10 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete:
 		deleteTaskHandler(w, r)
 	default:
-		writeError(w, http.StatusMethodNotAllowed, "метод не поддерживается")
+		writeError(w, http.StatusMethodNotAllowed, "method is not supported")
 	}
 }
 
-// writeError отправляет JSON вида {"error": "<текст>"} с указанным статусом.
 func writeError(w http.ResponseWriter, status int, message string) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(status)

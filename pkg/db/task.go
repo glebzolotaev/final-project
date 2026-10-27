@@ -8,9 +8,6 @@ import (
 
 const DateLayout = "20060102"
 
-// Task — описание задачи из таблицы scheduler.
-// Структура определена в пакете db, так как нужна и для записи в БД,
-// и для сериализации/десериализации JSON в обработчиках api.
 type Task struct {
 	ID      string `json:"id"`
 	Date    string `json:"date"`
@@ -19,8 +16,6 @@ type Task struct {
 	Repeat  string `json:"repeat"`
 }
 
-// AddTask добавляет задачу в таблицу scheduler и возвращает
-// идентификатор добавленной записи.
 func AddTask(task *Task) (int64, error) {
 	query := `INSERT INTO scheduler (date, title, comment, repeat) VALUES (?, ?, ?, ?)`
 	res, err := db.Exec(query, task.Date, task.Title, task.Comment, task.Repeat)
@@ -34,7 +29,6 @@ func AddTask(task *Task) (int64, error) {
 	return id, nil
 }
 
-// Tasks возвращает список ближайших задач, отсортированный по дате.
 func Tasks(search string, limit int) ([]*Task, error) {
 	base := `SELECT id, date, title, comment, repeat FROM scheduler`
 
@@ -75,29 +69,24 @@ func Tasks(search string, limit int) ([]*Task, error) {
 	return tasks, nil
 }
 
-// isDateSearch определяет, является ли строка датой формата 02.01.2006.
 func isDateSearch(s string) bool {
 	_, err := time.Parse("02.01.2006", s)
 	return err == nil
 }
 
-// GetTask возвращает задачу по её идентификатору.
-// Если запись не найдена, возвращает ошибку.
 func GetTask(id string) (*Task, error) {
 	var t Task
 	query := `SELECT id, date, title, comment, repeat FROM scheduler WHERE id = ?`
 	err := db.QueryRow(query, id).Scan(&t.ID, &t.Date, &t.Title, &t.Comment, &t.Repeat)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("Задача не найдена")
+			return nil, errors.New("task was not found")
 		}
 		return nil, err
 	}
 	return &t, nil
 }
 
-// UpdateTask обновляет задачу по её id.
-// Если записи с таким id нет, возвращает ошибку.
 func UpdateTask(task *Task) error {
 	query := `UPDATE scheduler SET date = ?, title = ?, comment = ?, repeat = ? WHERE id = ?`
 	res, err := db.Exec(query, task.Date, task.Title, task.Comment, task.Repeat, task.ID)
@@ -109,13 +98,11 @@ func UpdateTask(task *Task) error {
 		return err
 	}
 	if count == 0 {
-		return errors.New("Задача не найдена")
+		return errors.New("task was not found")
 	}
 	return nil
 }
 
-// DeleteTask удаляет задачу по её идентификатору.
-// Если записи с таким id нет, возвращает ошибку.
 func DeleteTask(id string) error {
 	res, err := db.Exec(`DELETE FROM scheduler WHERE id = ?`, id)
 	if err != nil {
@@ -126,14 +113,11 @@ func DeleteTask(id string) error {
 		return err
 	}
 	if count == 0 {
-		return errors.New("Задача не найдена")
+		return errors.New("task was not found")
 	}
 	return nil
 }
 
-// UpdateDate обновляет только дату задачи (используется при отметке
-// о выполнении периодической задачи).
-// Если записи с таким id нет, возвращает ошибку.
 func UpdateDate(next string, id string) error {
 	res, err := db.Exec(`UPDATE scheduler SET date = ? WHERE id = ?`, next, id)
 	if err != nil {
@@ -144,7 +128,7 @@ func UpdateDate(next string, id string) error {
 		return err
 	}
 	if count == 0 {
-		return errors.New("Задача не найдена")
+		return errors.New("task was not found")
 	}
 	return nil
 }

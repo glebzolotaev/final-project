@@ -8,14 +8,10 @@ import (
 	"final-project/pkg/nextdate"
 )
 
-// doneHandler обрабатывает POST /api/task/done?id=<идентификатор>.
-// Помечает задачу выполненной:
-//   - одноразовая (repeat пустой) — удаляется;
-//   - периодическая — её дата заменяется на дату следующего выполнения.
 func doneHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
 	if id == "" {
-		writeError(w, http.StatusBadRequest, "Не указан идентификатор задачи")
+		writeError(w, http.StatusBadRequest, "task identifier is not specified")
 		return
 	}
 
@@ -26,7 +22,6 @@ func doneHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if task.Repeat == "" {
-		// одноразовая задача — удаляем
 		if err := db.DeleteTask(id); err != nil {
 			writeError(w, http.StatusInternalServerError, err.Error())
 			return
@@ -35,11 +30,10 @@ func doneHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// периодическая задача — вычисляем следующую дату
 	now := time.Now()
 	next, err := nextdate.NextDate(now, task.Date, task.Repeat)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "ошибка вычисления следующей даты: "+err.Error())
+		writeError(w, http.StatusInternalServerError, "error in calculating the next date: "+err.Error())
 		return
 	}
 
@@ -51,11 +45,10 @@ func doneHandler(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, map[string]any{})
 }
 
-// deleteTaskHandler обрабатывает DELETE /api/task?id=<идентификатор>.
 func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
 	if id == "" {
-		writeError(w, http.StatusBadRequest, "Не указан идентификатор задачи")
+		writeError(w, http.StatusBadRequest, "task identifier is not specified")
 		return
 	}
 

@@ -7,10 +7,6 @@ import (
 	"final-project/pkg/nextdate"
 )
 
-// nextDayHandler обрабатывает GET /api/nextdate.
-//
-// Формат запроса: /api/nextdate?now=<20060102>&date=<20060102>&repeat=<правило>
-// Если now не задан, используется текущая дата.
 func nextDayHandler(w http.ResponseWriter, r *http.Request) {
 	nowStr := r.FormValue("now")
 
@@ -21,7 +17,7 @@ func nextDayHandler(w http.ResponseWriter, r *http.Request) {
 		var err error
 		now, err = time.Parse(nextdate.DateLayout, nowStr)
 		if err != nil {
-			http.Error(w, "некорректное значение параметра now", http.StatusBadRequest)
+			http.Error(w, "now parameter has an incorrect value", http.StatusBadRequest)
 			return
 		}
 	}

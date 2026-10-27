@@ -10,19 +10,13 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// jwtSecret — ключ для подписи токенов. Он не секретен сам по себе:
-// безопасность держится на пароле из TODO_PASSWORD, а хэш пароля
-// хранится внутри полезной нагрузки токена.
 const jwtSecret = "scheduler_jwt_secret_key"
 
-// hashPassword возвращает SHA-256 пароля в hex-строке.
 func hashPassword(password string) string {
 	sum := sha256.Sum256([]byte(password))
 	return hex.EncodeToString(sum[:])
 }
 
-// createToken формирует JWT-токен с хэшем пароля в полезной нагрузке
-// и сроком жизни 8 часов (столько же живёт кука на фронтенде).
 func createToken(password string) (string, error) {
 	claims := jwt.MapClaims{
 		"hash": hashPassword(password),
@@ -32,9 +26,6 @@ func createToken(password string) (string, error) {
 	return token.SignedString([]byte(jwtSecret))
 }
 
-// validateToken проверяет подпись и срок действия токена,
-// а затем сверяет хэш пароля из токена с хэшем текущего пароля.
-// Если пароль в переменной окружения сменился — старый токен невалиден.
 func validateToken(tokenStr string) bool {
 	token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -58,8 +49,6 @@ func validateToken(tokenStr string) bool {
 	return hashClaim == hashPassword(os.Getenv("TODO_PASSWORD"))
 }
 
-// auth — middleware аутентификации. Если TODO_PASSWORD не задан,
-// все запросы проходят свободно. Если задан — проверяем куку token.
 func auth(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		pass := os.Getenv("TODO_PASSWORD")
@@ -69,7 +58,7 @@ func auth(next http.HandlerFunc) http.HandlerFunc {
 				jwtStr = cookie.Value
 			}
 			if jwtStr == "" || !validateToken(jwtStr) {
-				writeError(w, http.StatusUnauthorized, "Требуется аутентификация")
+				writeError(w, http.StatusUnauthorized, "authentication is required")
 				return
 			}
 		}

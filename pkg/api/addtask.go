@@ -15,19 +15,18 @@ import (
 func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "не удалось прочитать запрос")
+		writeError(w, http.StatusInternalServerError, "request could not be read")
 		return
 	}
 
-	// именно db.Task, а не Task
 	var task db.Task
 	if err := json.Unmarshal(body, &task); err != nil {
-		writeError(w, http.StatusBadRequest, "ошибка десериализации JSON: "+err.Error())
+		writeError(w, http.StatusBadRequest, "JSON deserialization error: "+err.Error())
 		return
 	}
 
 	if task.Title == "" {
-		writeError(w, http.StatusBadRequest, "Не указан заголовок задачи")
+		writeError(w, http.StatusBadRequest, "task title is not specified")
 		return
 	}
 
@@ -36,9 +35,9 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := db.AddTask(&task) // SQL здесь не выполняем — только вызов пакета db
+	id, err := db.AddTask(&task)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "ошибка при добавлении задачи в БД: "+err.Error())
+		writeError(w, http.StatusInternalServerError, "error when adding a task to the database: "+err.Error())
 		return
 	}
 
@@ -54,7 +53,7 @@ func checkDate(task *db.Task) error {
 
 	t, err := time.Parse(nextdate.DateLayout, task.Date)
 	if err != nil {
-		return errors.New("дата представлена в некорректном формате, ожидается YYYYMMDD")
+		return errors.New("date is presented in an incorrect format, the expected format is YYYYMMDD")
 	}
 
 	var next string

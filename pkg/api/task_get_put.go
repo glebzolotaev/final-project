@@ -8,12 +8,10 @@ import (
 	"final-project/pkg/db"
 )
 
-// getTaskHandler обрабатывает GET /api/task?id=<идентификатор> —
-// возвращает JSON со всеми полями задачи.
 func getTaskHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
 	if id == "" {
-		writeError(w, http.StatusBadRequest, "Не указан идентификатор")
+		writeError(w, http.StatusBadRequest, "no identifier specified")
 		return
 	}
 
@@ -26,28 +24,25 @@ func getTaskHandler(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, task)
 }
 
-// updateTaskHandler обрабатывает PUT /api/task — сохраняет изменения задачи.
-// Валидация полей та же, что и при добавлении: title обязателен,
-// дата — формат 20060102, repeat — корректное правило.
 func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "не удалось прочитать запрос")
+		writeError(w, http.StatusInternalServerError, "request could not be read")
 		return
 	}
 
 	var task db.Task
 	if err := json.Unmarshal(body, &task); err != nil {
-		writeError(w, http.StatusBadRequest, "ошибка десериализации JSON: "+err.Error())
+		writeError(w, http.StatusBadRequest, "JSON deserialization error: "+err.Error())
 		return
 	}
 
 	if task.ID == "" {
-		writeError(w, http.StatusBadRequest, "Не указан идентификатор задачи")
+		writeError(w, http.StatusBadRequest, "task identifier is not specified")
 		return
 	}
 	if task.Title == "" {
-		writeError(w, http.StatusBadRequest, "Не указан заголовок задачи")
+		writeError(w, http.StatusBadRequest, "task title is not specified")
 		return
 	}
 
@@ -61,6 +56,5 @@ func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// успешное обновление — пустой JSON
 	writeJson(w, map[string]any{})
 }
